@@ -11,3 +11,4 @@ namespace TestWebAPIBicep.Controllers
         public IActionResult Get() => Ok("Healthy");
     }
 }
+ 
