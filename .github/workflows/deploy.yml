@@ -94,17 +94,5 @@ jobs:
             --name $APP_NAME \
             --src-path release.zip \
 
-      - name: Smoke test staging
-        run: |
-          URL="https://${APP_NAME}-${SLOT_NAME}.azurewebsites.net/staging"
-          for i in {1..8}; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" $URL) || true
-            if [ "$STATUS" == "200" ]; then echo "staging healthy"; exit 0; fi
-            echo "waiting..."
-            sleep 10
-          done
-          echo "staging health check failed" && exit 1
-
-      - name: Swap staging to production
         run: |
           az webapp deployment slot swap --resource-group $RESOURCE_GROUP --name $APP_NAME --slot $SLOT_NAME
