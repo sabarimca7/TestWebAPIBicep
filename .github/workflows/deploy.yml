@@ -87,9 +87,9 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Deploy to staging slot using Azure CLI
-        run: |
-          az webapp deploy \
-            --resource-group $RESOURCE_GROUP \
-            --name $APP_NAME \
-            --src-path release.zip \      
+      - name: Deploy to Azure WebApp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.APP_NAME }}
+          slot-name: 'production'   # or omit if no slots
+          package: ./release.zip   
