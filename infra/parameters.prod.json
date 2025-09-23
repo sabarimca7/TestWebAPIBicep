@@ -6,7 +6,6 @@
     "location": { "value": "canadacentral" },
     "skuName": { "value": "F1" },
     "workerCount": { "value": 1 },
-    "dotnetVersion": { "value": "DOTNETCORE|7.0" },
-    "enableStagingSlot": { "value": false }
+    "dotnetVersion": { "value": "v7.0" }
   }
 }
