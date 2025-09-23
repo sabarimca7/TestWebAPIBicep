@@ -20,7 +20,7 @@ on:
 env:
   RESOURCE_GROUP: 'ai-demo-sabari'    # ensure this RG exists or create in infra job
   LOCATION: 'eastus'
-  APP_NAME: 'test-webapi-bicep'        # must match infra parameters
+  APP_NAME: 'sabari-demo-api'        # must match infra parameters
   SLOT_NAME: 'staging'
   PARAMETERS_FILE: 'infra/parameters.prod.json'
 
