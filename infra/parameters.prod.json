@@ -4,7 +4,7 @@
   "parameters": {
     "appName": { "value": "test-webapi-bicep" },
     "location": { "value": "eastus" },
-    "skuName": { "value": "P1v2" },
+    "skuName": { "value": "B1" },
     "workerCount": { "value": 1 },
     "dotnetVersion": { "value": "DOTNETCORE|8.0" },
     "enableStagingSlot": { "value": true }
