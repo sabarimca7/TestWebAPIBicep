@@ -1,11 +1,11 @@
 ﻿param appName string
-param location string = resourceGroup().location
-param skuName string = 'P1v2'           // change as needed
+param location string = 'canadacentral'   // matches your manual plan
+param skuName string = 'F1'              // Free plan
 param workerCount int = 1
-param dotnetVersion string = 'DOTNETCORE|8.0' // check runtime string in Azure if needed
-param enableStagingSlot bool = true
+param dotnetVersion string = 'DOTNETCORE|7.0' // safer for free tier
+param enableStagingSlot bool = false     // staging not supported in F1
 
-// App Service Plan
+// App Service Plan (Free Tier)
 resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
   name: '${appName}-plan'
   location: location
@@ -14,11 +14,11 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
     capacity: workerCount
   }
   properties: {
-    reserved: true
+    reserved: true // Linux
   }
 }
 
-// Application Insights
+// Application Insights (Free version still available)
 resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: '${appName}-ai'
   location: location
@@ -62,17 +62,7 @@ resource webApp 'Microsoft.Web/sites@2022-03-01' = {
   ]
 }
 
-// Optional staging slot
-resource stagingSlot 'Microsoft.Web/sites/slots@2022-03-01' = if (enableStagingSlot) {
-  name: '${appName}/staging'
-  location: location
-  properties: {
-    serverFarmId: appServicePlan.id
-  }
-  dependsOn: [
-    webApp
-  ]
-}
+// No staging slot here because F1 doesn’t support it
 
 output defaultHostname string = webApp.properties.defaultHostName
 output instrumentationKey string = appInsights.properties.InstrumentationKey

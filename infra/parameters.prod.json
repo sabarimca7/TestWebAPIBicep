@@ -2,11 +2,11 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "appName": { "value": "test-webapi-bicep" },
-    "location": { "value": "eastus" },
-    "skuName": { "value": "B1" },
+    "appName": { "value": "sabari-demo-api" },
+    "location": { "value": "canadacentral" },
+    "skuName": { "value": "F1" },
     "workerCount": { "value": 1 },
-    "dotnetVersion": { "value": "DOTNETCORE|8.0" },
-    "enableStagingSlot": { "value": true }
+    "dotnetVersion": { "value": "DOTNETCORE|7.0" },
+    "enableStagingSlot": { "value": false }
   }
 }
