@@ -92,7 +92,4 @@ jobs:
           az webapp deploy \
             --resource-group $RESOURCE_GROUP \
             --name $APP_NAME \
-            --src-path release.zip \
-
-        run: |
-          az webapp deployment slot swap --resource-group $RESOURCE_GROUP --name $APP_NAME --slot $SLOT_NAME
+            --src-path release.zip \      
