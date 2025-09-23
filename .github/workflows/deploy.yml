@@ -1,0 +1,99 @@
+name: Infra + App CI/CD
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  RESOURCE_GROUP: 'ai-demo-sabari'    # ensure this RG exists or create in infra job
+  LOCATION: 'eastus'
+  APP_NAME: 'test-webapi-bicep'        # must match infra parameters
+  SLOT_NAME: 'staging'
+  PARAMETERS_FILE: 'infra/parameters.prod.json'
+
+jobs:
+  deploy-infra:
+    runs-on: ubuntu-latest
+    outputs:
+      infra_status: ${{ steps.deploy-bicep.outcome }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 'Login to Azure'
+        uses: azure/login@v1
+        with:
+          # If using OIDC, remove creds and use with: allow-no-subscriptions: true
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Install Bicep (if not present)
+        run: az bicep install
+
+      - name: Create resource group (if not exists)
+        run: |
+          az group create --name $RESOURCE_GROUP --location $LOCATION
+
+      - name: Bicep What-If
+        run: |
+          az deployment group what-if \
+            --resource-group $RESOURCE_GROUP \
+            --template-file infra/main.bicep \
+            --parameters @$PARAMETERS_FILE
+
+      - id: deploy-bicep
+        name: Deploy Bicep infra
+        run: |
+          az deployment group create \
+            --resource-group $RESOURCE_GROUP \
+            --template-file infra/main.bicep \
+            --parameters @$PARAMETERS_FILE
+
+  build-and-deploy:
+    needs: deploy-infra
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore ./src/TestWebAPIBicep/TestWebAPIBicep.csproj
+
+      - name: Build
+        run: dotnet build ./src/TestWebAPIBicep/TestWebAPIBicep.csproj -c Release --no-restore
+
+      - name: Publish
+        run: dotnet publish ./src/TestWebAPIBicep/TestWebAPIBicep.csproj -c Release -o ./publish
+
+      - name: Create ZIP package
+        run: zip -r release.zip ./publish
+
+      - name: Login to Azure (again - job-level)
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to staging slot using Azure CLI
+        run: |
+          az webapp deploy \
+            --resource-group $RESOURCE_GROUP \
+            --name $APP_NAME \
+            --src-path release.zip \
+            --slot $SLOT_NAME
+
+      - name: Smoke test staging
+        run: |
+          URL="https://${APP_NAME}-${SLOT_NAME}.azurewebsites.net/health"
+          for i in {1..8}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" $URL) || true
+            if [ "$STATUS" == "200" ]; then echo "staging healthy"; exit 0; fi
+            echo "waiting..."
+            sleep 10
+          done
+          echo "staging health check failed" && exit 1
+
+      - name: Swap staging to production
+        run: |
+          az webapp deployment slot swap --resource-group $RESOURCE_GROUP --name $APP_NAME --slot $SLOT_NAME
