@@ -37,11 +37,20 @@ resource webApp 'Microsoft.Web/sites@2022-03-01' = {
     serverFarmId: appServicePlan.id
     siteConfig: {
       linuxFxVersion: dotnetVersion
-      appSettings: [
-        { name: 'ASPNETCORE_ENVIRONMENT'; value: 'Production' }
-        { name: 'WEBSITE_RUN_FROM_PACKAGE'; value: '1' }
-        { name: 'APPINSIGHTS_INSTRUMENTATIONKEY'; value: appInsights.properties.InstrumentationKey }
-      ]
+        appSettings: [
+          {
+            name: 'ASPNETCORE_ENVIRONMENT'
+            value: 'Production'
+          },
+          {
+            name: 'WEBSITE_RUN_FROM_PACKAGE'
+            value: '1'
+          },
+          {
+            name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
+            value: appInsights.properties.InstrumentationKey
+          }
+        ]
     }
   }
   dependsOn: [
