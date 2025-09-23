@@ -4,6 +4,18 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+
 
 env:
   RESOURCE_GROUP: 'ai-demo-sabari'    # ensure this RG exists or create in infra job
