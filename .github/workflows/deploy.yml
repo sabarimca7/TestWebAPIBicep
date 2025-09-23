@@ -3,7 +3,7 @@ name: Infra + App CI/CD
 on:
   push:
     branches:
-      - main
+      - master
 
 env:
   RESOURCE_GROUP: 'ai-demo-sabari'    # ensure this RG exists or create in infra job
