@@ -93,7 +93,6 @@ jobs:
             --resource-group $RESOURCE_GROUP \
             --name $APP_NAME \
             --src-path release.zip \
-            --slot $SLOT_NAME
 
       - name: Smoke test staging
         run: |
