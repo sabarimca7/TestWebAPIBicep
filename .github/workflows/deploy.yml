@@ -96,7 +96,7 @@ jobs:
 
       - name: Smoke test staging
         run: |
-          URL="https://${APP_NAME}-${SLOT_NAME}.azurewebsites.net/health"
+          URL="https://${APP_NAME}-${SLOT_NAME}.azurewebsites.net/staging"
           for i in {1..8}; do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" $URL) || true
             if [ "$STATUS" == "200" ]; then echo "staging healthy"; exit 0; fi
