@@ -71,13 +71,13 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore
-        run: dotnet restore ./src/TestWebAPIBicep/TestWebAPIBicep.csproj
+        run: dotnet restore ./TestWebAPIBicep/TestWebAPIBicep.csproj
 
       - name: Build
-        run: dotnet build ./src/TestWebAPIBicep/TestWebAPIBicep.csproj -c Release --no-restore
+        run: dotnet build ./TestWebAPIBicep/TestWebAPIBicep.csproj -c Release --no-restore
 
       - name: Publish
-        run: dotnet publish ./src/TestWebAPIBicep/TestWebAPIBicep.csproj -c Release -o ./publish
+        run: dotnet publish ./TestWebAPIBicep/TestWebAPIBicep.csproj -c Release -o ./publish
 
       - name: Create ZIP package
         run: zip -r release.zip ./publish
