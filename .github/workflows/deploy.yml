@@ -20,7 +20,7 @@ on:
 env:
   RESOURCE_GROUP: 'ai-demo-sabari'    # ensure this RG exists or create in infra job
   LOCATION: 'eastus'
-  APP_NAME: 'test-webapi-bicep'        # must match infra parameters
+  APP_NAME: 'sabari-demo-api'        # must match infra parameters
   SLOT_NAME: 'staging'
   PARAMETERS_FILE: 'infra/parameters.prod.json'
 
@@ -71,13 +71,13 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore
-        run: dotnet restore ./src/TestWebAPIBicep/TestWebAPIBicep.csproj
+        run: dotnet restore ./TestWebAPIBicep/TestWebAPIBicep.csproj
 
       - name: Build
-        run: dotnet build ./src/TestWebAPIBicep/TestWebAPIBicep.csproj -c Release --no-restore
+        run: dotnet build ./TestWebAPIBicep/TestWebAPIBicep.csproj -c Release --no-restore
 
       - name: Publish
-        run: dotnet publish ./src/TestWebAPIBicep/TestWebAPIBicep.csproj -c Release -o ./publish
+        run: dotnet publish ./TestWebAPIBicep/TestWebAPIBicep.csproj -c Release -o ./publish
 
       - name: Create ZIP package
         run: zip -r release.zip ./publish
@@ -87,25 +87,9 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Deploy to staging slot using Azure CLI
-        run: |
-          az webapp deploy \
-            --resource-group $RESOURCE_GROUP \
-            --name $APP_NAME \
-            --src-path release.zip \
-            --slot $SLOT_NAME
-
-      - name: Smoke test staging
-        run: |
-          URL="https://${APP_NAME}-${SLOT_NAME}.azurewebsites.net/health"
-          for i in {1..8}; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" $URL) || true
-            if [ "$STATUS" == "200" ]; then echo "staging healthy"; exit 0; fi
-            echo "waiting..."
-            sleep 10
-          done
-          echo "staging health check failed" && exit 1
-
-      - name: Swap staging to production
-        run: |
-          az webapp deployment slot swap --resource-group $RESOURCE_GROUP --name $APP_NAME --slot $SLOT_NAME
+      - name: Deploy to Azure WebApp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.APP_NAME }}
+          slot-name: 'production'   # or omit if no slots
+          package: ./release.zip   
