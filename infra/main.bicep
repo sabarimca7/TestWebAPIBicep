@@ -1,35 +1,29 @@
-﻿param appName string
-param location string = 'canadacentral'
-param skuName string = 'F1'
-param workerCount int = 1
-param dotnetVersion string = 'v7.0'  // Windows runtime string
+﻿param location string = resourceGroup().location
+param appName string
+param sqlServerName string
+param sqlDbName string
+@secure()
+param sqlAdminPassword string
 
-resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
-  name: '${appName}-plan'
-  location: location
-  sku: {
-    name: skuName
-    capacity: workerCount
+// Deploy App Service
+module appservice './modules/appservice.bicep' = {
+  name: 'appserviceDeploy'
+  params: {
+    appName: appName
+    location: location
   }
-  properties: {} // no reserved:true → Windows plan
 }
 
-resource webApp 'Microsoft.Web/sites@2022-03-01' = {
-  name: appName
-  location: location
-  identity: {
-    type: 'SystemAssigned'
+// Deploy SQL Database
+module sql './modules/sql.bicep' = {
+  name: 'sqlDeploy'
+  params: {
+    sqlServerName: sqlServerName
+    sqlDbName: sqlDbName
+    location: location
+    administratorLoginPassword: sqlAdminPassword
   }
-  kind: 'app'  // not "app,linux"
-  properties: {
-    serverFarmId: appServicePlan.id
-    siteConfig: {
-      netFrameworkVersion: dotnetVersion
-    }
-  }
-  dependsOn: [
-    appServicePlan
-  ]
 }
 
-output defaultHostname string = webApp.properties.defaultHostName
+output appServiceUrl string = appservice.outputs.defaultHostname
+output sqlServerFQDN string = sql.outputs.sqlServerFullyQualifiedDomainName
